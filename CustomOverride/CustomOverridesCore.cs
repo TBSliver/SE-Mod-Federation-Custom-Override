@@ -18,10 +18,10 @@ namespace CustomOverride
             CustomOverrideSettings();
         }
 
-        private const float BaseAtmosphericThrust = 9600 * 2f;
+        private const float BaseAtmosphericThrust = 9600 * 25f;
         private const float BaseAtmosphericEfficiency = 0.8f;
         private const float BaseAtmosphericPower = 0.2f;
-        private const float BaseSkybladeThrust = BaseAtmosphericThrust * 1.2f;
+        private const float BaseSkybladeThrust = BaseAtmosphericThrust * 0.1f;
         private const float BasePowerConsumptionDivision = 4000f;
 
         private static void ModifyAtmospheric(MyThrustDefinition myThrustDefinition, float multiplier)
@@ -31,7 +31,7 @@ namespace CustomOverride
 
         private static void ModifySkyblade(MyThrustDefinition myThrustDefinition, float multiplier)
         {
-            ModifyAtmospheric(BaseSkybladeThrust, myThrustDefinition, multiplier, 10f);
+            ModifyAtmospheric(BaseSkybladeThrust, myThrustDefinition, multiplier, 35f);
         }
 
         private static void ModifyAtmospheric(float baseThrust, MyThrustDefinition myThruster, float multiplier,
@@ -84,11 +84,11 @@ namespace CustomOverride
                     // Modifications for Skyblades https://steamcommunity.com/sharedfiles/filedetails/?id=577079238
                     // 4 Blades Medium Propeller
                     case "HeloThrusterMedium4Blade":
-                        ModifySkyblade(thrustDefinition, 18f);
+                        ModifySkyblade(thrustDefinition, 24f);
                         break;
                     // 4 Blades Large Propeller
                     case "HeloThrusterLarge4Blade":
-                        ModifySkyblade(thrustDefinition, 24f);
+                        ModifySkyblade(thrustDefinition, 32f);
                         break;
                     // 5 Blades Small Propeller
                     case "HeloThrusterSmall5Blade":
@@ -96,7 +96,7 @@ namespace CustomOverride
                         break;
                     // 5 Blades Large Propeller
                     case "HeloThrusterLarge5Blade":
-                        ModifySkyblade(thrustDefinition, 24f);
+                        ModifySkyblade(thrustDefinition, 32f);
                         break;
                     // 5 Blades Tail Propeller
                     case "HeloThrusterTailRotor5Blade":
