@@ -22,19 +22,28 @@ namespace CustomOverride
         private const float BaseAtmosphericEfficiency = 0.8f;
         private const float BaseAtmosphericPower = 0.2f;
         private const float BaseSkybladeThrust = BaseAtmosphericThrust * 1.2f;
+        private const float BasePowerConsumptionDivision = 4000f;
 
         private static void ModifyAtmospheric(MyThrustDefinition myThrustDefinition, float multiplier)
         {
-            myThrustDefinition.ForceMagnitude = BaseAtmosphericThrust * multiplier;
-            myThrustDefinition.MaxPowerConsumption = (myThrustDefinition.ForceMagnitude * BaseAtmosphericEfficiency) *
-                                                     BaseAtmosphericPower;
+            ModifyAtmospheric(BaseAtmosphericThrust, myThrustDefinition, multiplier, 1f);
         }
 
         private static void ModifySkyblade(MyThrustDefinition myThrustDefinition, float multiplier)
         {
-            myThrustDefinition.ForceMagnitude = BaseSkybladeThrust * multiplier;
-            myThrustDefinition.MaxPowerConsumption = (myThrustDefinition.ForceMagnitude * BaseAtmosphericEfficiency) *
-                                                     BaseAtmosphericPower;
+            ModifyAtmospheric(BaseSkybladeThrust, myThrustDefinition, multiplier, 10f);
+        }
+
+        private static void ModifyAtmospheric(float baseThrust, MyThrustDefinition myThruster, float multiplier,
+            float efficiency)
+        {
+            myThruster.ForceMagnitude = baseThrust * multiplier;
+            myThruster.MaxPowerConsumption
+                = (
+                    (myThruster.ForceMagnitude / BasePowerConsumptionDivision)
+                    * BaseAtmosphericEfficiency
+                    * BaseAtmosphericPower
+                ) / efficiency;
         }
 
         private static void CustomOverrideSettings()
@@ -186,7 +195,7 @@ namespace CustomOverride
                         break;
                 }
             }
-            
+
             // // This doesnt work??
             // IEnumerable<MyOxygenTankDefinition> oxygenTankDefinitions =
             //     MyDefinitionManager.Static.GetAllDefinitions().OfType<MyOxygenTankDefinition>();
