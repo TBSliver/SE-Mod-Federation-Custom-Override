@@ -37,7 +37,9 @@ namespace CustomOverride
         private static void ModifyAtmospheric(float baseThrust, MyThrustDefinition myThruster, float multiplier,
             float efficiency)
         {
+            // measured in N
             myThruster.ForceMagnitude = baseThrust * multiplier;
+            // measured in MW
             myThruster.MaxPowerConsumption
                 = (
                     (myThruster.ForceMagnitude / BasePowerConsumptionDivision)
@@ -124,6 +126,7 @@ namespace CustomOverride
                 }
             }
 
+            // Hydrogen Engine Changes
             IEnumerable<MyHydrogenEngineDefinition> hydrogenEngineDefinitions =
                 MyDefinitionManager.Static.GetAllDefinitions().OfType<MyHydrogenEngineDefinition>();
             foreach (MyHydrogenEngineDefinition engineDefinition in hydrogenEngineDefinitions)
@@ -138,6 +141,7 @@ namespace CustomOverride
                 }
             }
 
+            // Oxygen Generator Changes
             IEnumerable<MyOxygenGeneratorDefinition> oxygenGeneratorDefinitions =
                 MyDefinitionManager.Static.GetAllDefinitions().OfType<MyOxygenGeneratorDefinition>();
             foreach (MyOxygenGeneratorDefinition oxygenGeneratorDefinition in oxygenGeneratorDefinitions)
@@ -150,7 +154,7 @@ namespace CustomOverride
                         break;
                     // Small Grid
                     case "OxygenGeneratorSmall":
-                        oxygenGeneratorDefinition.OperationalPowerConsumption *= 5f;
+                        oxygenGeneratorDefinition.OperationalPowerConsumption *= 10f;
                         break;
                     // USGC Large
                     case "OxygenGenerator_3223_USGC":
@@ -162,21 +166,23 @@ namespace CustomOverride
                     case "OxygenGenerator2_3223_USGC":
                         // 3 times the size of the Small Grid, so 3x the power
                         oxygenGeneratorDefinition.OperationalPowerConsumption = 1.5f;
-                        oxygenGeneratorDefinition.IceConsumptionPerSecond = 1.5f;
+                        oxygenGeneratorDefinition.IceConsumptionPerSecond = 15f;
                         break;
                     // USGC Small
                     case "OxygenGenerator3_3223_USGC":
                         // 10th the size of the Small Grid original, so 10th the power
-                        oxygenGeneratorDefinition.OperationalPowerConsumption = 0.05f;
-                        oxygenGeneratorDefinition.IceConsumptionPerSecond = 0.5f;
+                        oxygenGeneratorDefinition.OperationalPowerConsumption = 0.1f;
+                        oxygenGeneratorDefinition.IceConsumptionPerSecond = 1f;
                         oxygenGeneratorDefinition.InventoryMaxVolume = 0.2f;
                         oxygenGeneratorDefinition.InventorySize.X = 0.07f;
                         oxygenGeneratorDefinition.InventorySize.Y = 0.07f;
                         oxygenGeneratorDefinition.InventorySize.Z = 0.07f;
+                        ReworkGasses(oxygenGeneratorDefinition, 10, 20);
                         break;
                 }
             }
 
+            // Battery Changes
             IEnumerable<MyBatteryBlockDefinition> batteryBlockDefinitions =
                 MyDefinitionManager.Static.GetAllDefinitions().OfType<MyBatteryBlockDefinition>();
             foreach (MyBatteryBlockDefinition batteryBlockDefinition in batteryBlockDefinitions)
@@ -194,20 +200,73 @@ namespace CustomOverride
                         batteryBlockDefinition.MaxStoredPower *= 2f;
                         break;
                 }
+
+                batteryBlockDefinition.MaxPowerOutput *= 6f;
             }
 
-            // // This doesnt work??
-            // IEnumerable<MyOxygenTankDefinition> oxygenTankDefinitions =
-            //     MyDefinitionManager.Static.GetAllDefinitions().OfType<MyOxygenTankDefinition>();
-            // foreach (var oxygenTankDefinition in oxygenTankDefinitions)
-            // {
-            //     switch (oxygenTankDefinition.Id.SubtypeName)
-            //     {
-            //         case "LargeHydrogenTank":
-            //             oxygenTankDefinition.Capacity = 150000000f;
-            //             break;
-            //     }
-            // }
+            // Hydrogen Storage Changes
+            IEnumerable<MyGasTankDefinition> gasTankDefinitions =
+                MyDefinitionManager.Static.GetAllDefinitions().OfType<MyGasTankDefinition>();
+            foreach (MyGasTankDefinition gasTankDefinition in gasTankDefinitions)
+            {
+                switch (gasTankDefinition.Id.SubtypeName)
+                {
+                    // Large
+                    case "LargeHydrogenTankSmall_3223_USGC":
+                        gasTankDefinition.Capacity = 1000000f;
+                        break;
+                    // Medium
+                    case "LargeHydrogenTankSmall2_3223_USGC":
+                        gasTankDefinition.Capacity = 216000f;
+                        // Actually ok, never mind
+                        break;
+                    // Small
+                    case "LargeHydrogenTankSmall3_3223_USGC":
+                        gasTankDefinition.Capacity = 7500f;
+                        break;
+                }
+                
+                gasTankDefinition.Capacity *= 10f;
+            }
+
+            // Reactor Changes
+            IEnumerable<MyReactorDefinition> reactorDefinitions = MyDefinitionManager.Static.GetAllDefinitions().OfType<MyReactorDefinition>();
+            foreach (MyReactorDefinition reactorDefinition in reactorDefinitions)
+            {
+                switch (reactorDefinition.Id.SubtypeName)
+                {
+                    case "SmallBlockSmallGenerator":
+                        reactorDefinition.MaxPowerOutput = 0.01f;
+                        break;
+                    case "SmallBlockLargeGenerator":
+                        reactorDefinition.MaxPowerOutput = 0.5f;
+                        break;
+                }
+            }
+        }
+        
+        private static void ReworkGasses(MyOxygenGeneratorDefinition oxygenGeneratorDefinition, float oxygen, float hydrogen)
+        {
+            // Damned structs and their immutability
+            List<MyOxygenGeneratorDefinition.MyGasGeneratorResourceInfo> producedGases =
+                new List<MyOxygenGeneratorDefinition.MyGasGeneratorResourceInfo>(oxygenGeneratorDefinition
+                    .ProducedGases.Count);
+            foreach (MyOxygenGeneratorDefinition.MyGasGeneratorResourceInfo gas in
+                oxygenGeneratorDefinition.ProducedGases)
+            {
+                MyOxygenGeneratorDefinition.MyGasGeneratorResourceInfo newGas = gas;
+                switch (gas.Id.SubtypeName)
+                {
+                    case "Oxygen":
+                        newGas.IceToGasRatio = oxygen;
+                        break;
+                    case "Hydrogen":
+                        newGas.IceToGasRatio = hydrogen;
+                        break;
+                }
+                producedGases.Add(newGas);
+            }
+            oxygenGeneratorDefinition.ProducedGases = producedGases;
         }
     }
 }
