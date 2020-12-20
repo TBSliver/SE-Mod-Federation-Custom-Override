@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.Definitions;
 using VRage.Game.Components;
 
@@ -21,7 +20,7 @@ namespace CustomOverride
 
         private const float BaseAtmosphericThrust = 9600 * 2f;
         private const float BaseAtmosphericEfficiency = 0.8f;
-        private const float BaseAtmosphericPower = 10f;
+        private const float BaseAtmosphericPower = 0.2f;
         private const float BaseSkybladeThrust = BaseAtmosphericThrust * 1.2f;
 
         private static void ModifyAtmospheric(MyThrustDefinition myThrustDefinition, float multiplier)
@@ -128,9 +127,6 @@ namespace CustomOverride
                         engineDefinition.FuelProductionToCapacityMultiplier = 0.01f;
                         break;
                 }
-
-                // This works backwards to how you think it does! This reduces the fuel consumption
-                engineDefinition.FuelProductionToCapacityMultiplier *= 10;
             }
 
             IEnumerable<MyOxygenGeneratorDefinition> oxygenGeneratorDefinitions =
@@ -142,26 +138,22 @@ namespace CustomOverride
                     // Large Grid
                     case "":
                         oxygenGeneratorDefinition.OperationalPowerConsumption *= 10f;
-                        RecalculateGasses(oxygenGeneratorDefinition, 0.1f);
                         break;
                     // Small Grid
                     case "OxygenGeneratorSmall":
                         oxygenGeneratorDefinition.OperationalPowerConsumption *= 5f;
-                        RecalculateGasses(oxygenGeneratorDefinition, 0.05f);
                         break;
                     // USGC Large
                     case "OxygenGenerator_3223_USGC":
                         // Match Large Grid
                         oxygenGeneratorDefinition.OperationalPowerConsumption = 5f;
                         oxygenGeneratorDefinition.IceConsumptionPerSecond = 25f;
-                        RecalculateGasses(oxygenGeneratorDefinition, 0.1f);
                         break;
                     // USGC Medium
                     case "OxygenGenerator2_3223_USGC":
                         // 3 times the size of the Small Grid, so 3x the power
                         oxygenGeneratorDefinition.OperationalPowerConsumption = 1.5f;
                         oxygenGeneratorDefinition.IceConsumptionPerSecond = 1.5f;
-                        RecalculateGasses(oxygenGeneratorDefinition, 0.1f);
                         break;
                     // USGC Small
                     case "OxygenGenerator3_3223_USGC":
@@ -172,26 +164,41 @@ namespace CustomOverride
                         oxygenGeneratorDefinition.InventorySize.X = 0.07f;
                         oxygenGeneratorDefinition.InventorySize.Y = 0.07f;
                         oxygenGeneratorDefinition.InventorySize.Z = 0.07f;
-                        RecalculateGasses(oxygenGeneratorDefinition, 0.1f);
                         break;
                 }
             }
-        }
 
-        private static void RecalculateGasses(MyOxygenGeneratorDefinition oxygenGeneratorDefinition, float multiplier)
-        {
-            // Damned structs and their immutability
-            List<MyOxygenGeneratorDefinition.MyGasGeneratorResourceInfo> producedGases =
-                new List<MyOxygenGeneratorDefinition.MyGasGeneratorResourceInfo>(oxygenGeneratorDefinition
-                    .ProducedGases.Count);
-            foreach (MyOxygenGeneratorDefinition.MyGasGeneratorResourceInfo gas in
-                oxygenGeneratorDefinition.ProducedGases)
+            IEnumerable<MyBatteryBlockDefinition> batteryBlockDefinitions =
+                MyDefinitionManager.Static.GetAllDefinitions().OfType<MyBatteryBlockDefinition>();
+            foreach (MyBatteryBlockDefinition batteryBlockDefinition in batteryBlockDefinitions)
             {
-                MyOxygenGeneratorDefinition.MyGasGeneratorResourceInfo newGas = gas;
-                newGas.IceToGasRatio *= multiplier;
-                producedGases.Add(newGas);
+                switch (batteryBlockDefinition.Id.SubtypeName)
+                {
+                    case "LargeBlockBatteryBlock":
+                        batteryBlockDefinition.MaxPowerOutput *= 2f;
+                        batteryBlockDefinition.RequiredPowerInput *= 2f;
+                        batteryBlockDefinition.MaxStoredPower *= 2f;
+                        break;
+                    case "LargeBlockBatteryBlock_3223_USGC":
+                        batteryBlockDefinition.MaxPowerOutput *= 2f;
+                        batteryBlockDefinition.RequiredPowerInput *= 2f;
+                        batteryBlockDefinition.MaxStoredPower *= 2f;
+                        break;
+                }
             }
-            oxygenGeneratorDefinition.ProducedGases = producedGases;
+            
+            // // This doesnt work??
+            // IEnumerable<MyOxygenTankDefinition> oxygenTankDefinitions =
+            //     MyDefinitionManager.Static.GetAllDefinitions().OfType<MyOxygenTankDefinition>();
+            // foreach (var oxygenTankDefinition in oxygenTankDefinitions)
+            // {
+            //     switch (oxygenTankDefinition.Id.SubtypeName)
+            //     {
+            //         case "LargeHydrogenTank":
+            //             oxygenTankDefinition.Capacity = 150000000f;
+            //             break;
+            //     }
+            // }
         }
     }
 }
