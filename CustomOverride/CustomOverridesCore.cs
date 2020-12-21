@@ -20,7 +20,7 @@ namespace CustomOverride
 
         private const float BaseAtmosphericThrust = 9600 * 25f;
         private const float BaseAtmosphericEfficiency = 0.8f;
-        private const float BaseAtmosphericPower = 0.2f;
+        private const float BaseAtmosphericPower = 0.1f;
         private const float BaseSkybladeThrust = BaseAtmosphericThrust * 0.1f;
         private const float BasePowerConsumptionDivision = 4000f;
 
@@ -31,7 +31,7 @@ namespace CustomOverride
 
         private static void ModifySkyblade(MyThrustDefinition myThrustDefinition, float multiplier)
         {
-            ModifyAtmospheric(BaseSkybladeThrust, myThrustDefinition, multiplier, 35f);
+            ModifyAtmospheric(BaseSkybladeThrust, myThrustDefinition, multiplier, 4.5f);
         }
 
         private static void ModifyAtmospheric(float baseThrust, MyThrustDefinition myThruster, float multiplier,
