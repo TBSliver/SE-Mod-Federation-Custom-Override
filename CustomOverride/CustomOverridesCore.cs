@@ -156,6 +156,9 @@ namespace CustomOverride
                     case "OxygenGeneratorSmall":
                         oxygenGeneratorDefinition.OperationalPowerConsumption *= 10f;
                         break;
+                    case "H2 O2 Generator Large":
+                        oxygenGeneratorDefinition.OperationalPowerConsumption *= 10f;
+                        break;
                     // USGC Large
                     case "OxygenGenerator_3223_USGC":
                         // Match Large Grid
