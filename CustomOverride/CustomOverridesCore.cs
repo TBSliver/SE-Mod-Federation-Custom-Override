@@ -15,6 +15,7 @@ namespace CustomOverride
 
         public override void LoadData()
         {
+            ReduceMinimalPricePerUnit();
             CustomOverrideSettings();
         }
 
@@ -46,6 +47,16 @@ namespace CustomOverride
                     * BaseAtmosphericEfficiency
                     * BaseAtmosphericPower
                 ) / efficiency;
+        }
+
+        private static void ReduceMinimalPricePerUnit()
+        {
+            IEnumerable<MyPhysicalItemDefinition> physicalItemDefinitions =
+                MyDefinitionManager.Static.GetAllDefinitions().OfType<MyPhysicalItemDefinition>();
+            foreach (MyPhysicalItemDefinition physicalItemDefinition in physicalItemDefinitions)
+            {
+                physicalItemDefinition.MinimalPricePerUnit = 1;
+            }
         }
 
         private static void CustomOverrideSettings()
